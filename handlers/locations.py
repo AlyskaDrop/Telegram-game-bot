@@ -7,7 +7,7 @@ from telegram.ext import Application, CallbackQueryHandler, ContextTypes
 from config import DB_PATH
 from database import (
     get_user, get_location, get_all_locations, get_monsters_at_location,
-    update_user, add_exp, add_gold, add_to_inventory
+    update_user, add_exp, add_gold, add_to_inventory, get_user_clan
 )
 from game.combat import calculate_player_stats, fight_monster
 from game.levels import check_level_up
@@ -56,7 +56,6 @@ async def handle_location_detail(update: Update, context: ContextTypes.DEFAULT_T
             monsters = await get_monsters_at_location(db, location_id)
             clan = None
             if user.get("clan_id"):
-                from database import get_user_clan
                 clan = await get_user_clan(db, user["id"])
             if user["current_location_id"] != location_id:
                 await update_user(db, user["id"], current_location_id=location_id)

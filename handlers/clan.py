@@ -1,6 +1,6 @@
 import logging
 import aiosqlite
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application, CallbackQueryHandler, ContextTypes,
     ConversationHandler, MessageHandler, filters, CommandHandler
@@ -9,7 +9,7 @@ from telegram.ext import (
 from config import DB_PATH
 from database import (
     get_user, get_user_clan, create_clan, get_clan, get_clan_members,
-    get_clan_buildings, upgrade_clan_building, update_user
+    get_clan_buildings, upgrade_clan_building, update_user, add_gold
 )
 from keyboards import clan_keyboard, clan_management_keyboard, back_keyboard
 
@@ -84,7 +84,6 @@ async def handle_clan_name_input(update: Update, context: ContextTypes.DEFAULT_T
             if not user:
                 await update.message.reply_text("Персонаж не найден.")
                 return ConversationHandler.END
-            from database import add_gold
             await create_clan(db, clan_name, user["id"])
             await add_gold(db, user["id"], -CLAN_CREATE_COST)
         await update.message.reply_text(
@@ -156,7 +155,6 @@ async def handle_clan_buildings(update: Update, context: ContextTypes.DEFAULT_TY
             for b in buildings:
                 name = building_names.get(b["building_type"], b["building_type"])
                 lines.append(f"• {name}: уровень {b['level']}")
-        from telegram import InlineKeyboardButton, InlineKeyboardMarkup
         upgrade_kb = []
         for bt, bn in building_names.items():
             upgrade_kb.append([InlineKeyboardButton(f"⬆️ Улучшить {bn}", callback_data=f"clan:upgrade:{bt}")])
@@ -253,7 +251,6 @@ async def handle_clan_join_list(update: Update, context: ContextTypes.DEFAULT_TY
             db.row_factory = aiosqlite.Row
             async with db.execute("SELECT * FROM clans ORDER BY level DESC LIMIT 10") as cursor:
                 clans = [dict(r) for r in await cursor.fetchall()]
-        from telegram import InlineKeyboardButton, InlineKeyboardMarkup
         keyboard = []
         for clan in clans:
             keyboard.append([InlineKeyboardButton(

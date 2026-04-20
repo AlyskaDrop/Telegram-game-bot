@@ -8,7 +8,7 @@ from telegram.ext import (
 )
 
 from config import DB_PATH, ADMIN_IDS
-from database import get_user, add_gold, add_to_inventory
+from database import get_user, add_gold, add_to_inventory, get_item
 from keyboards import admin_keyboard, back_keyboard
 
 logger = logging.getLogger(__name__)
@@ -114,7 +114,6 @@ async def admin_give_item_item(update: Update, context: ContextTypes.DEFAULT_TYP
             if not user:
                 await update.message.reply_text("Пользователь не найден.")
                 return ConversationHandler.END
-            from database import get_item
             item = await get_item(db, item_id)
             if not item:
                 await update.message.reply_text("Предмет не найден.")

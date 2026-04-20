@@ -4,7 +4,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
 from config import DB_PATH
-from database import get_user, create_user, get_character_stats, update_user
+from database import get_user, create_user, get_character_stats, update_user, get_user_buffs
 from game.levels import exp_for_level, check_level_up
 from keyboards import main_menu_keyboard, profile_keyboard, stats_keyboard, profession_keyboard, buffs_keyboard, back_keyboard
 
@@ -206,7 +206,6 @@ async def handle_buffs(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if not user:
                 await query.edit_message_text("Персонаж не найден.")
                 return
-            from database import get_user_buffs
             buffs = await get_user_buffs(db, user["id"])
         if not buffs:
             text = "✨ У вас нет активных бонусов."

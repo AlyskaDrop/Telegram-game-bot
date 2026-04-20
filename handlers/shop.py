@@ -4,7 +4,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CallbackQueryHandler, ContextTypes
 
 from config import DB_PATH
-from database import get_user, get_all_items_of_type, add_gold, add_to_inventory
+from database import get_user, get_all_items_of_type, add_gold, add_to_inventory, get_item
 from keyboards import shop_keyboard, back_keyboard
 
 logger = logging.getLogger(__name__)
@@ -80,7 +80,6 @@ async def handle_shop_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if not user:
                 await query.edit_message_text("Персонаж не найден.")
                 return
-            from database import get_item
             item = await get_item(db, item_id)
             if not item:
                 await query.answer("Предмет не найден!", show_alert=True)
