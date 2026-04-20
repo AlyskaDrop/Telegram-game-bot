@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import json
+import os
 import aiosqlite
 from telegram.ext import Application
 from config import BOT_TOKEN, DB_PATH
@@ -166,6 +167,7 @@ async def seed_data(db):
 
 
 async def main():
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True) if os.path.dirname(DB_PATH) else None
     app = Application.builder().token(BOT_TOKEN).build()
     async with aiosqlite.connect(DB_PATH) as db:
         await init_db(db)
