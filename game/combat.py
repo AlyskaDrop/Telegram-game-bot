@@ -102,11 +102,11 @@ async def fight_monster(player_stats, monster):
     log = []
     rounds = 0
     won = False
-    player_first = p_speed >= m_defense
+    player_has_initiative = p_speed >= m_defense
 
     for _ in range(20):
         rounds += 1
-        if player_first:
+        if player_has_initiative:
             dmg, is_crit, is_dodge = calculate_damage(p_attack, m_defense, p_crit, 0.05)
             if is_dodge:
                 log.append(f"Раунд {rounds}: Монстр уклонился!")
