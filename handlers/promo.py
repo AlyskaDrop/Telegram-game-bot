@@ -103,12 +103,16 @@ async def handle_promo_input(update: Update, context: ContextTypes.DEFAULT_TYPE)
     return ConversationHandler.END
 
 
+async def _cancel_promo_conv(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    return ConversationHandler.END
+
+
 def setup_handlers(app: Application):
     conv_handler = ConversationHandler(
         entry_points=[CallbackQueryHandler(handle_promo_start, pattern="^promo:start$")],
         states={
             WAITING_PROMO_CODE: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_promo_input)],
         },
-        fallbacks=[CommandHandler("start", lambda u, c: ConversationHandler.END)],
+        fallbacks=[CommandHandler("start", _cancel_promo_conv)],
     )
     app.add_handler(conv_handler)

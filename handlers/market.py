@@ -251,6 +251,10 @@ async def handle_market_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Error in handle_market_buy: {e}", exc_info=True)
 
 
+async def _cancel_market_conv(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    return ConversationHandler.END
+
+
 def setup_handlers(app: Application):
     conv_handler = ConversationHandler(
         entry_points=[CallbackQueryHandler(handle_market_create_start, pattern="^market:create$")],
@@ -258,7 +262,7 @@ def setup_handlers(app: Application):
             WAITING_ITEM_SELECT: [CallbackQueryHandler(handle_market_item_selected, pattern="^market:select:")],
             WAITING_PRICE: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_market_price_input)],
         },
-        fallbacks=[CommandHandler("start", lambda u, c: ConversationHandler.END)],
+        fallbacks=[CommandHandler("start", _cancel_market_conv)],
     )
     app.add_handler(conv_handler)
     app.add_handler(CallbackQueryHandler(handle_market_list, pattern="^market:list:"))

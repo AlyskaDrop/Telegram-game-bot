@@ -102,7 +102,7 @@ async def fight_monster(player_stats, monster):
     log = []
     rounds = 0
     won = False
-    player_has_initiative = p_speed >= m_defense
+    player_has_initiative = p_speed >= monster.get("level", 1) * 2
 
     for _ in range(20):
         rounds += 1

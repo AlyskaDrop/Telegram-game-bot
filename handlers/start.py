@@ -4,7 +4,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
 from config import DB_PATH
-from database import get_user, create_user, get_character_stats, update_user, get_user_buffs
+from database import get_user, create_user, update_user, get_user_buffs
 from game.levels import exp_for_level, check_level_up
 from keyboards import main_menu_keyboard, profile_keyboard, stats_keyboard, profession_keyboard, buffs_keyboard, back_keyboard
 

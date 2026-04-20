@@ -266,16 +266,19 @@ async def handle_clan_join_list(update: Update, context: ContextTypes.DEFAULT_TY
         logger.error(f"Error in handle_clan_join_list: {e}", exc_info=True)
 
 
+async def _cancel_clan_conv(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    return ConversationHandler.END
+
+
 def setup_handlers(app: Application):
     conv_handler = ConversationHandler(
         entry_points=[CallbackQueryHandler(handle_clan_create, pattern="^clan:create$")],
         states={
             WAITING_CLAN_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_clan_name_input)],
         },
-        fallbacks=[CommandHandler("start", lambda u, c: ConversationHandler.END)],
+        fallbacks=[CommandHandler("start", _cancel_clan_conv)],
     )
     app.add_handler(conv_handler)
-    app.add_handler(CallbackQueryHandler(handle_clan_menu, pattern="^clan:menu$"))
     app.add_handler(CallbackQueryHandler(handle_clan_info, pattern="^clan:info$"))
     app.add_handler(CallbackQueryHandler(handle_clan_buildings, pattern="^clan:buildings$"))
     app.add_handler(CallbackQueryHandler(handle_clan_upgrade_building, pattern="^clan:upgrade:"))

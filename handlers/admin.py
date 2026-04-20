@@ -253,6 +253,10 @@ async def admin_promo_uses(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
+async def _cancel_admin_conv(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    return ConversationHandler.END
+
+
 def setup_handlers(app: Application):
     admin_filter = filters.User(user_id=ADMIN_IDS)
 
@@ -273,7 +277,7 @@ def setup_handlers(app: Application):
             ADMIN_PROMO_REWARD: [MessageHandler(filters.TEXT & ~filters.COMMAND & admin_filter, admin_promo_reward)],
             ADMIN_PROMO_USES: [MessageHandler(filters.TEXT & ~filters.COMMAND & admin_filter, admin_promo_uses)],
         },
-        fallbacks=[CommandHandler("start", lambda u, c: ConversationHandler.END)],
+        fallbacks=[CommandHandler("start", _cancel_admin_conv)],
     )
     app.add_handler(CommandHandler("admin", cmd_admin))
     app.add_handler(conv_handler)
