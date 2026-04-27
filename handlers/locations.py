@@ -10,7 +10,7 @@ from database import (
     update_user, add_exp, add_gold, add_to_inventory, get_user_clan
 )
 from game.combat import calculate_player_stats, fight_monster
-from game.levels import check_level_up
+from game.levels import check_level_up, get_hunter_rank
 from keyboards import locations_keyboard, location_action_keyboard, back_keyboard
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ async def handle_locations_list(update: Update, context: ContextTypes.DEFAULT_TY
                 return
             locations = await get_all_locations(db)
         await query.edit_message_text(
-            f"🗺 Локации (ваш уровень: {user['level']}):",
+            f"🚪 Врата данжей (ваш уровень: {user['level']}):",
             reply_markup=locations_keyboard(locations, user["current_location_id"])
         )
     except Exception as e:
@@ -60,13 +60,13 @@ async def handle_location_detail(update: Update, context: ContextTypes.DEFAULT_T
             if user["current_location_id"] != location_id:
                 await update_user(db, user["id"], current_location_id=location_id)
         monster_list = ", ".join(m["name"] for m in monsters) if monsters else "Нет монстров"
-        owner_text = f"\n👑 Владелец: клан {location.get('clan_owner_id')}" if location.get("clan_owner_id") else ""
+        owner_text = f"\n👑 Захвачено гильдией: {location.get('clan_owner_id')}" if location.get("clan_owner_id") else ""
         text = (
-            f"📍 {location['name']}\n"
-            f"Требуемый уровень: {location['level_req']}\n"
+            f"🚪 {location['name']}\n"
+            f"Требуемый уровень охотника: {location['level_req']}\n"
             f"Описание: {location.get('description', '')}\n"
             f"Монстры: {monster_list}\n"
-            f"🐉 Босс: {location.get('boss_name', 'Нет')} (HP: {location.get('boss_hp', 0)}){owner_text}"
+            f"👹 Босс данжа: {location.get('boss_name', 'Нет')} (HP: {location.get('boss_hp', 0)}){owner_text}"
         )
         await query.edit_message_text(
             text,
@@ -121,11 +121,15 @@ async def handle_fight(update: Update, context: ContextTypes.DEFAULT_TYPE):
         log_preview = "\n".join(result["log"][-5:]) if result["log"] else ""
         if result["won"]:
             loot_text = ", ".join(f"{l['item_id']}x{l['quantity']}" for l in result["loot"]) if result["loot"] else "Нет"
-            level_up_text = f"\n🎉 Уровень повышен до {new_level}!" if leveled_up else ""
+            if leveled_up:
+                new_rank = get_hunter_rank(new_level)
+                level_up_text = f"\n📟 [Система] Уровень повышен до {new_level}! Ранг: {new_rank}"
+            else:
+                level_up_text = ""
             text = (
-                f"⚔️ Бой с {monster['name']}:\n\n"
+                f"⚔️ Охота: {monster['name']}:\n\n"
                 f"{log_preview}\n\n"
-                f"✅ Победа! Раундов: {result['rounds']}\n"
+                f"✅ Монстр уничтожен! Раундов: {result['rounds']}\n"
                 f"✨ Опыт: +{result['exp_gained']}\n"
                 f"💰 Золото: +{result['gold_gained']}\n"
                 f"🎒 Добыча: {loot_text}"
@@ -133,9 +137,9 @@ async def handle_fight(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         else:
             text = (
-                f"⚔️ Бой с {monster['name']}:\n\n"
+                f"⚔️ Охота: {monster['name']}:\n\n"
                 f"{log_preview}\n\n"
-                f"❌ Поражение! Раундов: {result['rounds']}\n"
+                f"❌ Вы были вынуждены отступить! Раундов: {result['rounds']}\n"
                 f"HP осталось: {result['player_hp_remaining']}"
             )
         await query.edit_message_text(text, reply_markup=back_keyboard(f"loc:detail:{location_id}"))
@@ -185,10 +189,10 @@ async def handle_boss_fight(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 leveled_up, new_level = await check_level_up(user["id"], db)
                 new_hp = max(1, result["player_hp_remaining"])
                 await update_user(db, user["id"], hp=new_hp)
-                level_up_text = f"\n🎉 Уровень повышен до {new_level}!" if leveled_up else ""
+                level_up_text = f"\n📟 [Система] Уровень повышен до {new_level}!" if leveled_up else ""
                 text = (
-                    f"🐉 Бой с боссом {boss['name']}:\n\n"
-                    f"✅ Победа! Раундов: {result['rounds']}\n"
+                    f"👹 Бой с боссом данжа {boss['name']}:\n\n"
+                    f"✅ Босс повержен! Раундов: {result['rounds']}\n"
                     f"✨ Опыт: +{result['exp_gained']}\n"
                     f"💰 Золото: +{result['gold_gained']}"
                     f"{level_up_text}"
@@ -197,8 +201,8 @@ async def handle_boss_fight(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 hp_left = max(1, result["player_hp_remaining"])
                 await update_user(db, user["id"], hp=hp_left)
                 text = (
-                    f"🐉 Бой с боссом {boss['name']}:\n\n"
-                    f"❌ Поражение! Раундов: {result['rounds']}"
+                    f"👹 Бой с боссом данжа {boss['name']}:\n\n"
+                    f"❌ Босс оказался слишком силён! Раундов: {result['rounds']}"
                 )
         await query.edit_message_text(text, reply_markup=back_keyboard(f"loc:detail:{location_id}"))
     except Exception as e:

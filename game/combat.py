@@ -19,7 +19,7 @@ async def calculate_player_stats(user_id, db):
     luck = user["luck"]
     profession = user.get("profession")
 
-    if profession == "Воин":
+    if profession == "Боец":
         strength = int(strength * 1.2)
         vitality = int(vitality * 1.1)
     elif profession == "Маг":
@@ -28,15 +28,15 @@ async def calculate_player_stats(user_id, db):
     elif profession == "Лучник":
         agility = int(agility * 1.2)
         luck = int(luck * 1.1)
-    elif profession == "Разбойник":
+    elif profession == "Убийца":
         agility = int(agility * 1.15)
         luck = int(luck * 1.15)
-    elif profession == "Жрец":
+    elif profession == "Целитель":
         intelligence = int(intelligence * 1.2)
         vitality = int(vitality * 1.1)
 
     base_hp = 100 + vitality * 10
-    if profession in ("Маг", "Жрец"):
+    if profession in ("Маг", "Целитель"):
         base_attack = 5 + intelligence * 2
     else:
         base_attack = 5 + strength * 2

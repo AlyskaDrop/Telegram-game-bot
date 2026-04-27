@@ -4,19 +4,19 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 def main_menu_keyboard():
     keyboard = [
         [
-            InlineKeyboardButton("👤 Профиль", callback_data="profile:menu"),
+            InlineKeyboardButton("👤 Охотник", callback_data="profile:menu"),
             InlineKeyboardButton("🎒 Инвентарь", callback_data="equip:inventory:0"),
         ],
         [
-            InlineKeyboardButton("🗺 Локации", callback_data="loc:list"),
-            InlineKeyboardButton("⚔️ Клан", callback_data="clan:menu"),
+            InlineKeyboardButton("🚪 Данжи", callback_data="loc:list"),
+            InlineKeyboardButton("⚔️ Гильдия", callback_data="clan:menu"),
         ],
         [
             InlineKeyboardButton("🛒 Магазин", callback_data="shop:menu"),
             InlineKeyboardButton("📦 Рынок", callback_data="market:list:0"),
         ],
         [
-            InlineKeyboardButton("🏟 Арена", callback_data="arena:menu"),
+            InlineKeyboardButton("🏟 Арена охотников", callback_data="arena:menu"),
             InlineKeyboardButton("🏭 Бизнес", callback_data="biz:menu"),
         ],
         [
@@ -67,14 +67,14 @@ def stats_keyboard(free_points):
 def clan_keyboard(is_in_clan, is_leader):
     keyboard = []
     if is_in_clan:
-        keyboard.append([InlineKeyboardButton("📋 Информация о клане", callback_data="clan:info")])
-        keyboard.append([InlineKeyboardButton("🏛 Здания клана", callback_data="clan:buildings")])
+        keyboard.append([InlineKeyboardButton("📋 Информация о гильдии", callback_data="clan:info")])
+        keyboard.append([InlineKeyboardButton("🏛 Здания гильдии", callback_data="clan:buildings")])
         if is_leader:
             keyboard.append([InlineKeyboardButton("⚙️ Управление", callback_data="clan:manage")])
-        keyboard.append([InlineKeyboardButton("🚪 Покинуть клан", callback_data="clan:leave")])
+        keyboard.append([InlineKeyboardButton("🚪 Покинуть гильдию", callback_data="clan:leave")])
     else:
-        keyboard.append([InlineKeyboardButton("➕ Создать клан", callback_data="clan:create")])
-        keyboard.append([InlineKeyboardButton("🔍 Найти клан", callback_data="clan:join_list")])
+        keyboard.append([InlineKeyboardButton("➕ Создать гильдию", callback_data="clan:create")])
+        keyboard.append([InlineKeyboardButton("🔍 Найти гильдию", callback_data="clan:join_list")])
     keyboard.append([InlineKeyboardButton("🔙 Назад", callback_data="main_menu")])
     return InlineKeyboardMarkup(keyboard)
 
@@ -142,11 +142,11 @@ def locations_keyboard(locations, current_location_id):
 def location_action_keyboard(location_id, player_level, loc_level_req, has_clan):
     keyboard = []
     if player_level >= loc_level_req:
-        keyboard.append([InlineKeyboardButton("⚔️ Сражаться с монстром", callback_data=f"fight:monster:{location_id}")])
-        keyboard.append([InlineKeyboardButton("🐉 Сразиться с боссом", callback_data=f"fight:boss:{location_id}")])
+        keyboard.append([InlineKeyboardButton("⚔️ Охота на монстров", callback_data=f"fight:monster:{location_id}")])
+        keyboard.append([InlineKeyboardButton("👹 Сразиться с боссом данжа", callback_data=f"fight:boss:{location_id}")])
         if has_clan:
-            keyboard.append([InlineKeyboardButton("🏰 Захватить локацию", callback_data=f"loc:capture:{location_id}")])
-    keyboard.append([InlineKeyboardButton("🔙 К локациям", callback_data="loc:list")])
+            keyboard.append([InlineKeyboardButton("🏰 Захватить врата", callback_data=f"loc:capture:{location_id}")])
+    keyboard.append([InlineKeyboardButton("🔙 К воротам", callback_data="loc:list")])
     return InlineKeyboardMarkup(keyboard)
 
 
@@ -228,8 +228,8 @@ def events_keyboard(events):
 
 def arena_keyboard():
     keyboard = [
-        [InlineKeyboardButton("⚔️ Вступить в очередь", callback_data="arena:join")],
-        [InlineKeyboardButton("🏆 Топ игроков", callback_data="arena:top")],
+        [InlineKeyboardButton("⚔️ Вступить в очередь на бой", callback_data="arena:join")],
+        [InlineKeyboardButton("🏆 Топ охотников", callback_data="arena:top")],
         [InlineKeyboardButton("🔙 Главное меню", callback_data="main_menu")],
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -268,7 +268,7 @@ def confirm_keyboard(action, item_id):
 
 
 def profession_keyboard():
-    professions = ["Воин", "Маг", "Лучник", "Разбойник", "Жрец"]
+    professions = ["Убийца", "Маг", "Лучник", "Боец", "Целитель"]
     keyboard = []
     for p in professions:
         keyboard.append([InlineKeyboardButton(p, callback_data=f"prof:set:{p}")])

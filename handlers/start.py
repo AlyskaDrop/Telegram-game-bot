@@ -5,7 +5,7 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Cont
 
 from config import DB_PATH
 from database import get_user, create_user, update_user, get_user_buffs
-from game.levels import exp_for_level, check_level_up
+from game.levels import exp_for_level, check_level_up, get_hunter_rank
 from keyboards import main_menu_keyboard, profile_keyboard, stats_keyboard, profession_keyboard, buffs_keyboard, back_keyboard
 
 logger = logging.getLogger(__name__)
@@ -21,11 +21,18 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if not user:
                 user = await create_user(db, telegram_id, username)
                 welcome = (
-                    f"🎮 Добро пожаловать в игру, {username}!\n\n"
-                    "Вы создали нового персонажа. Начните своё приключение!"
+                    "📟 [Системное сообщение]\n\n"
+                    f"Поздравляем! {username}, вы пробудились как Охотник!\n\n"
+                    "Уникальная способность «Поднятие уровня в одиночку» активирована.\n"
+                    "Система будет направлять вас. Докажите своё право называться сильнейшим!\n\n"
+                    "🎮 Добро пожаловать в мир Охотников!"
                 )
             else:
-                welcome = f"👋 С возвращением, {username}!"
+                welcome = (
+                    "📟 [Системное сообщение]\n\n"
+                    f"С возвращением, Охотник {username}!\n"
+                    f"🏅 Ваш ранг: {get_hunter_rank(user['level'])}"
+                )
         await update.message.reply_text(welcome, reply_markup=main_menu_keyboard())
     except Exception as e:
         logger.error(f"Error in cmd_start: {e}", exc_info=True)
@@ -59,17 +66,20 @@ async def handle_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
         bar = "█" * filled + "░" * (10 - filled)
         profession = user.get("profession") or "Не выбрана"
         clan_id = user.get("clan_id")
-        clan_text = f"Клан ID: {clan_id}" if clan_id else "Нет клана"
+        clan_text = f"Гильдия ID: {clan_id}" if clan_id else "Нет гильдии"
+        hunter_rank = get_hunter_rank(level)
         text = (
-            f"👤 Профиль: {user['username']}\n"
+            "📟 [Карточка Охотника]\n\n"
+            f"👤 Имя: {user['username']}\n"
+            f"🏅 Ранг: {hunter_rank}\n"
             f"📊 Уровень: {level}\n"
             f"✨ Опыт: {exp}/{needed} [{bar}]\n"
             f"💰 Золото: {user['gold']}\n"
-            f"💎 Премиум: {user['premium_currency']}\n"
+            f"💎 Кристаллы: {user['premium_currency']}\n"
             f"❤️ HP: {user['hp']}/{user['max_hp']}\n"
-            f"⚔️ Профессия: {profession}\n"
+            f"⚔️ Класс: {profession}\n"
             f"🏰 {clan_text}\n"
-            f"📍 Локация: {user['current_location_id']}\n"
+            f"🚪 Данж: {user['current_location_id']}\n"
         )
         await query.edit_message_text(text, reply_markup=profile_keyboard())
     except Exception as e:
@@ -153,13 +163,13 @@ async def handle_profession_menu(update: Update, context: ContextTypes.DEFAULT_T
     await query.answer()
     try:
         text = (
-            "⚔️ Выберите профессию:\n\n"
-            "🗡 Воин — мастер ближнего боя, высокая сила и живучесть\n"
-            "🧙 Маг — использует магию, высокий интеллект\n"
-            "🏹 Лучник — дальний бой, высокая ловкость и удача\n"
-            "🗡 Разбойник — скрытность и критические удары\n"
-            "✝️ Жрец — магия поддержки, интеллект и живучесть\n\n"
-            "⚠️ Профессию можно выбрать только один раз!"
+            "📟 [Система] Выберите класс Охотника:\n\n"
+            "🗡 Убийца — мастер теневых атак, высокая ловкость и крит\n"
+            "🧙 Маг — повелитель стихий, высокий интеллект\n"
+            "🏹 Лучник — меткий стрелок, высокая ловкость и удача\n"
+            "🥊 Боец — мастер ближнего боя, высокая сила и живучесть\n"
+            "✝️ Целитель — поддержка отряда, интеллект и живучесть\n\n"
+            "⚠️ Класс можно выбрать только один раз!"
         )
         await query.edit_message_text(text, reply_markup=profession_keyboard())
     except Exception as e:
@@ -172,9 +182,9 @@ async def handle_set_profession(update: Update, context: ContextTypes.DEFAULT_TY
     try:
         parts = query.data.split(":")
         profession = parts[2]
-        valid_professions = ["Воин", "Маг", "Лучник", "Разбойник", "Жрец"]
+        valid_professions = ["Убийца", "Маг", "Лучник", "Боец", "Целитель"]
         if profession not in valid_professions:
-            await query.answer("Неизвестная профессия.", show_alert=True)
+            await query.answer("Неизвестный класс.", show_alert=True)
             return
         telegram_id = update.effective_user.id
         async with aiosqlite.connect(DB_PATH) as db:
@@ -184,11 +194,11 @@ async def handle_set_profession(update: Update, context: ContextTypes.DEFAULT_TY
                 await query.edit_message_text("Персонаж не найден.")
                 return
             if user.get("profession"):
-                await query.answer("Профессия уже выбрана!", show_alert=True)
+                await query.answer("Класс уже выбран!", show_alert=True)
                 return
             await update_user(db, user["id"], profession=profession)
         await query.edit_message_text(
-            f"✅ Профессия «{profession}» успешно выбрана!",
+            f"📟 [Система]\n\n✅ Класс «{profession}» успешно выбран!\nСистема зафиксировала ваш путь охотника.",
             reply_markup=back_keyboard("profile:menu")
         )
     except Exception as e:

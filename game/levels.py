@@ -8,6 +8,22 @@ def exp_for_level(level):
     return level * level * 100
 
 
+def get_hunter_rank(level):
+    """Return Hunter rank based on level, Solo Leveling style."""
+    if level >= 50:
+        return "S-ранг"
+    elif level >= 40:
+        return "A-ранг"
+    elif level >= 30:
+        return "B-ранг"
+    elif level >= 20:
+        return "C-ранг"
+    elif level >= 10:
+        return "D-ранг"
+    else:
+        return "E-ранг"
+
+
 async def check_level_up(user_id, db):
     """Check if user has enough exp to level up. Award 3 free stat points per level.
     Returns (leveled_up_bool, new_level)."""
@@ -38,14 +54,16 @@ async def check_level_up(user_id, db):
 def get_level_rewards(level):
     """Returns dict of gold rewards for reaching a level."""
     gold = 0
-    if level == 5:
-        gold = 500
-    elif level == 10:
-        gold = 1000
+    if level == 10:
+        gold = 1000  # D-rank hunter promotion
     elif level == 20:
-        gold = 3000
+        gold = 3000  # C-rank hunter promotion
     elif level == 30:
-        gold = 5000
+        gold = 5000  # B-rank hunter promotion
+    elif level == 40:
+        gold = 10000  # A-rank hunter promotion
+    elif level == 50:
+        gold = 20000  # S-rank hunter promotion
     elif level % 5 == 0:
         gold = 100
     return {"gold": gold}

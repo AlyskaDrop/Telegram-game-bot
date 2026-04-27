@@ -28,7 +28,7 @@ async def handle_arena_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 row = await cursor.fetchone()
             in_queue = dict(row)["cnt"] > 0
         status = "Вы в очереди ожидания." if in_queue else "Вы не в очереди."
-        text = f"🏟 Арена\n\n{status}\n\nСразитесь с другими игроками!"
+        text = f"🏟 Арена охотников\n\n{status}\n\nСразитесь с другими охотниками за звание сильнейшего!"
         await query.edit_message_text(text, reply_markup=arena_keyboard())
     except Exception as e:
         logger.error(f"Error in handle_arena_menu: {e}", exc_info=True)
